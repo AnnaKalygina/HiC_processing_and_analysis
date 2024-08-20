@@ -18,6 +18,9 @@ In Lazaris et al., the insulation score is implemented as the ratio of maximum l
 We also added a pseudocount calculated from chromosome-wide average intensity to prevent division by zero in unmappable regions. 
 Given that all the regions contain n interactions, the insulation score can be formulated as follows:
 
+<img width="974" alt="Screenshot 2024-08-20 at 11 34 53" src="https://github.com/user-attachments/assets/a693f5bd-8070-4735-bae8-6eb1cebbbefd">
+
+
 <img width="370" alt="Screenshot 2024-08-18 at 22 02 34" src="https://github.com/user-attachments/assets/e8604365-24e5-4a00-bde1-1c9f4b9ba0d0">
 
 
