@@ -1,4 +1,4 @@
-# Inuslation scpre and boundaries
+# Inuslation score and boundaries
 
 ### Calculating insulation score
 Topologically Associated Domains (TADs) are genomic neighborhoods characterized by high levels of chromatin interactions within a domain and relatively fewer interactions across domains. These domains are demarcated by boundaries—genomic regions bound by insulators that impede DNA contacts between adjacent domains.
@@ -7,7 +7,7 @@ When visualizing Hi-C matrices, TADs often appear as patterns along the main dia
 
 To calculate the insulation score, we use a diamond-shaped window that surrounds the locus along the main diagonal. The score is computed for each window as it strides along the diagonal. Several methods exist for calculating the insulation score:
 
-- Crane et al. (2015): They sum the total contact count within each window. This method is implemented in the FAN-C package ([see here](https://vaquerizaslab.github.io/fanc/fanc-executable/fanc-analyse-hic/domains.html)).
+- [Crane et al. (2015)](https://www.nature.com/articles/nature14450): They sum the total contact count within each window. This method is implemented in the FAN-C package ([see here](https://vaquerizaslab.github.io/fanc/fanc-executable/fanc-analyse-hic/domains.html)).
 
 - [Lazaris et al. (2017)](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-016-3387-6): They divide the maximum contact count between the left and right regions from the locus by the contact count in the middle region. Given that each region contains n interactions, the insulation score is calculated as:
 
