@@ -14,11 +14,6 @@ For this purpose, we would stride a diamond-shaped window surrounding the loci, 
 
 - In Crane et al. 2015, they simply add up total contact count per window. Such method is implemented in the FAN-C package. [https://vaquerizaslab.github.io/fanc/fanc-executable/fanc-analyse-hic/domains.html]
 
-  ``` python
-  
-
-  ```
-
 - In Lazaris et al., they divide the maximum contact count between the right and the left regions from the loci by the contact count in the middle regions (see oicture below) . Given that all the regions contain n interactions, the insulation score can be formulated as follows:
 
 $Insulation score = \frac{max(L, R)}{C}$
@@ -152,9 +147,35 @@ boundary_positions = boundaries * resolution + region[1]
 all_boundaries = find_boundaries(GM12878_insulation_scores)
 all_boundary_positions = all_boundaries * resolution + region[1]
 
+# Plot the insulation score and boundaries
+region = ['chr1', 10000000, 12000000]
+GM12878_matrix = GM12878.matrix(balance=False).fetch(region)
+GM12878_insulation_scores = chr_score(data, radius = 50000)
+resolution = 10000
+start_bp = region[1]
+end_bp = region[2]
+
+
+plt.figure(figsize=(15, 5))
+plt.plot(np.arange(len(GM12878_insulation_scores)) * resolution + region[1], GM12878_insulation_scores, label='Insulation Score')
+plt.scatter(all_boundary_positions, np.array(GM12878_insulation_scores)[all_boundaries], color='green', label='All Boundaries')
+plt.scatter(boundary_positions, np.array(GM12878_insulation_scores)[boundaries], color='red', label='Boundaries')
+
+
+# Set ticks for genomic positions
+ax = plt.gca() 
+n_ticks = 10
+ticks = ["{0:.2f}".format(x / 1000000) for x in np.arange(start_bp, end_bp, (end_bp - start_bp) / n_ticks)]
+ax.set_xticklabels(ticks)
+
+plt.xlabel('Genomic Position')
+plt.ylabel('Insulation Score')
+plt.title('Inuslation score with TAD boundaries \n GM12878 Hi-C (res = 10kb) chr1: 10Mb - 12Mb')
+plt.legend()
+plt.show()
 
 ```
-
+<img width="1023" alt="Screenshot 2024-08-20 at 14 46 27" src="https://github.com/user-attachments/assets/93cedf03-a4af-4f70-84d7-cbae3f26b8b2">
 
 ### Other HiC features
 At higher resolutions we can witness the focal points and fountains on the HiC maps.
