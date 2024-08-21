@@ -1,13 +1,12 @@
 # Recording attention of a model to specific patterns in the data
 
-The model is based on transformer, the transformer has 8 heads. During training, the data fed to the transformer is attributed with specific weights, this attribution and tailoring of weight is called attention. 
-Different models have different attention mechanisms, but mostly it is a black box for us to know what parts of the data the model will be attending to the most. 
-However, we can record attention to different regions of DNA during training by extracting the weights from these 8 transformer heads. The validation dataset is based solely in chromosome ten (chrX), so the data always refers to this one chromosome.
+The model is based on a transformer architecture, which has 8 attention heads. During training, the data fed to the transformer is weighted by specific factors—a process known as attention. Although different models implement various attention mechanisms, the specifics of which parts of the data the model will focus on often remain opaque, making it a black box.
+
+However, we can track attention to different regions of the DNA during training by extracting the weights from these 8 transformer heads. The validation dataset is exclusively based on chromosome ten (chrX), so all data pertains to this chromosome.
 
 ### Extract TSS data from the SK1 yeast strain 
 
-I had an assumption that the greatest attentnion would be associated with transcription start sites (TSS) and promoter regions, as they are the most biologically relevant. So, at first we need to extract data on promoter and TSS regions from SK1 yeast. 
-The data is available in the file SK1_PacBio.all_feature_modified_2genes.gff uploaded in this folder. Load it to the Jupyter notebook:
+I hypothesized that the greatest attention would be associated with transcription start sites (TSS) and promoter regions, as they are biologically significant. Therefore, the first step is to extract data on promoter and TSS regions from the SK1 yeast strain. This data is available in the file SK1_PacBio.all_feature_modified_2genes.gff uploaded in this folder. Load it into the Jupyter notebook:
 
 ``` python
 gff_df = pd.read_csv('/Users/tennisnyjmac/Downloads/SK1_PacBio.all_feature_modified_2genes.gff', sep='\t', comment='#', header=None, 
@@ -21,7 +20,7 @@ end_pos_array = gff_df.loc[(gff_df['type'] == 'mRNA') & (gff_df['chr'] == 'chrX'
 end_neg_array = gff_df.loc[(gff_df['type'] == 'mRNA') & (gff_df['chr'] == 'chrX') & (gff_df['strand'] == '-')]['start'].array
 all_end = np.hstack((end_pos_array, end_neg_array))
 ```
-Some promoters could exert activation on both strand, they are called bidirectional promoters. The way to filter them:
+Some promoters can activate transcription on both strands; these are known as bidirectional promoters. To filter them out:
 
 ```python
 # Find the transcriprion start sites with bidirectional promoters
@@ -37,7 +36,7 @@ pos_bidirectional_tss = [bidirectional_promoters[bp][0] for bp in range(len(bidi
 neg_bidirectional_tss = [bidirectional_promoters[bp][1] for bp in range(len(bidirectional_promoters))]
 ```
 ### Extract weights for the windows the model was trained on
-The weights extracted from transformer are continuous, however, we tested them on specific windows, so we need to extract weights for exactly those windows:
+The attention weights extracted from the transformer are continuous, but we tested them on specific windows, so we need to extract weights for exactly those windows:
 
 ``` python
 #Extract chromosome coordinates pairs from the data the model was tested on:
@@ -92,12 +91,11 @@ plt.xlim(0,53382)
 plt.legend()
 plt.show()
 ```
-The following graph is produced. The vertical lines represent the specificities of the TSSs.
+The following graph is produced. The vertical lines represent the TSSs.
 
 <img width="1126" alt="Screenshot 2024-08-21 at 13 47 38" src="https://github.com/user-attachments/assets/04538f8c-1111-49cc-951c-25d4c1c9f68c">
 
-
-It would be cool to aggregate attention weights depending to their position relative to TSSs:
+It would be insightful to aggregate attention weights based on their position relative to TSSs:
 ``` python
 base_pairs = all_attn_scores_dict.keys()
 attn_to_bp = [np.mean(all_attn_scores_dict[bp]) for bp in base_pairs]
@@ -128,11 +126,11 @@ plt.show()
 
 <img width="1140" alt="Screenshot 2024-08-21 at 13 56 06" src="https://github.com/user-attachments/assets/1df1e2fe-a06b-4af2-aa1f-e5747194dedc">
 
-Do the same procedure for exclusively negative promoters:
+Repeat the same procedure for exclusively negative strand promoters:
 
 <img width="1121" alt="Screenshot 2024-08-21 at 13 56 48" src="https://github.com/user-attachments/assets/03bc14ef-67b6-4ad1-b852-9f53863d3222">
 
-And now bidirectional promoters and combine all three in the same graph:
+Now, analyze bidirectional promoters and combine all three on the same graph:
 
 <img width="1136" alt="Screenshot 2024-08-21 at 13 57 19" src="https://github.com/user-attachments/assets/5e8deb83-864b-48f4-93ef-84464b5fa2e1">
 
