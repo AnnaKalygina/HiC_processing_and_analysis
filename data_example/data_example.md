@@ -18,10 +18,10 @@ matrix = c.matrix()
 
 The provided Hi-C files represent data from the following cell lines:
 
-- **GM12878**
-- **K562**
-- **CHM13**
-- **HG002**
+- **GM12878** (both HiC and MicroC)
+- **K562** (both HiC and MicroC)
+- **CHM13** (HiC)
+- **HG002** (HiC)
 
 **Note:** These files were constructed using data from various sources, resulting in differing coverage levels. When comparing different cell lines, you may need to adjust for coverage differences. This can be done by normalizing to either the lower or higher coverage, depending on your analysis requirements.
 
