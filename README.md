@@ -34,4 +34,4 @@ To study these interactions, we use the Hi-C (High-throughput chromosome conform
 **Hi-C Data Processing and Analysis**
 In this GitHub repository, I will present a detailed, step-by-step guide on how to process, visualize, and analyze Hi-C data. This includes everything from the initial data processing using the HiC-Pro pipeline to more advanced analyses such as calculating insulation scores to identify TAD boundaries, integrating epigenetic data, and exploring the functional implications of chromatin structure on genome regulation.
 
-# [HiC processing: from .fasta to .pairs](HiC_processing_and_analysis/processing)
+# [HiC processing: from .fasta to .pairs](processing)
