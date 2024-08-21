@@ -1,5 +1,7 @@
 # Tools for HiC prediction
-## Filtering problematic regions 
+## Filtering problematic regions
+The accuracy of predictions could be significantly improved by training the model on a dataset with reduced noise. Approximately 10% of the hg38 genome is unmappable, low-covered, or noisy, which the model might mistakenly interpret as a pattern. To enhance the quality of the training data, it's essential to filter out regions with low coverage and gaps before model training. This pipeline provides a method to aggregate problematic regions and filter out any windows used for training that overlap these regions based on a specific threshold.
+
 ### Collect problematic regions
 
 - **Generate telomere positions:**
