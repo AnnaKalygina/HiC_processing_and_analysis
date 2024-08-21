@@ -1,8 +1,10 @@
 # From fasta to pairs
-There are many ways to process the HiC data from the .fasta format to the final .bam pairs file both manually and using available pipelines. The ones that I would definitely recommend are the HiC-Pro and Mirny's lab pipeline. However, for some types of data, for example diploid HiC processing or Micro-C, many of these pipelines are either much harder to use or unavailable at all. Therefore, in this tutorial I will first go through step-by-step manual processing that is relevant for any kind of data. Make sure, the required packages are installed beforehand
+There are many ways to process the HiC data from the .fasta format to the final .bam pairs file both manually and using available pipelines. The ones that I would definitely recommend are the HiC-Pro and Mirny's lab pipeline. However, for some types of data, for example diploid HiC processing or Micro-C, many of these pipelines are either much harder to use or unavailable at all. Therefore, in this tutorial I will first go through step-by-step manual processing that is relevant for any kind of data. Make sure, the required packages are installed beforehand:
 
 - samtools
-- 
+- pairtools
+- cooltools
+- HiC-Pro
 
 ### Pre-processing
 Before we start mapping the reads to the reference genome, we need to prepare several files that will be used alongside. 
@@ -35,10 +37,58 @@ bwa mem -5SP -T0 -t16 hg38.fasta <(zcat file1.R1.fastq.gz file2.R1.fastq.gz file
 ```
 
 You can find more information on how to choose alignment parameters in [bwa documentation](https://bio-bwa.sourceforge.net/bwa.shtml). 
+
 *Note:* if you are planning to be aligning diploid library on diploid genome, it is better to align reads separately. 
 
+This step yields a single .sam format file with alignments.
+
 ### Recording ligation events
-We use the parse module of the pairtools pipeline to find ligation junctions in Micro-C (and other proximity ligation) libraries. When a ligation event is identified in the alignment file the pairtools pipeline will record the outer-most (5’) aligned base pair and the strand of each one of the paired reads into .pairsam file (pairsam format captures SAM entries together with the Hi-C pair information). In addition, it will also asign a pair type for each event. e.g. if both reads aligned uniquely to only one region in the genome, the type UU (Unique-Unique) will be assigned to the pair. The following steps are necessary to identify the high quality valid pairs over low quality events (e.g. due to low mapping quality):
+Now we need to filter aligned reads to .pairs file, which will consist of only valid biological interactions. For this purpose, I use a pairtools command `parse`. The great overview on how to parse pairs is in [this documentation](https://pairtools.readthedocs.io/en/latest/parsing.html).
+
+A couple of terms to now before setting command parameters:
+
+**Ligation junction***
+Some kits, like Arima kit, introduce linkers to the ends if interacting pairs. Therefore, when sequenced, some reads will span ligation junctions introduced during experimental procedure. When these 'chimeric' single-end reads are mapped to the reference genome, and both 5' and 3' ends align to the sequence with a high mapping score, the 3' end portion that comes from the junction must be filtered out. Therefore, when a ligation event is identified in the alignment file the pairtools pipeline will record the outer-most (5’) aligned base pair.
+
+**Walks**
+It could happen, that during experimental procedure, more than 2 sequences get ligated together, yielding more than 2 hihg-quality alignments from only 2 reads, thwy are called walks. The most basic way to handle such walks is to disregard the middle portion with --walks-policy 5unique, however, if you want to save all high-quality mapping and consider them as valid combinations of pairs, the different walk policy could be used. 
+
+**Alignment gaps**
+As opposed to walks, some portions of reads could align only partially. If a part of a read doesn't map well to the reference genome, we call it a gap. Such gaps could be considered as an accidental insertion or a technical artifact, thus we assume that even with this missing part our reads were formed by one ligation event and therefore a pair must be reported. To set how big gaps the command must tolerate before reporting a pair we set --max-inter-align-gap. Traditionally this value is set to 30bp.
+
+For optimal results run the following command:
+```
+pairtools parse --min-mapq 40 --walks-policy 5unique \
+--max-inter-align-gap 30 --nproc-in <cores>\
+--nproc-out <cores> --chroms-path <ref.genome> <aligned.sam> > <parsed.pairsam>
+
+```
+As a result, this step will record classification of each pair from the .sam entry to the .pairsam file. So, if both reads aligned uniquely to only one region in the genome, the type UU (Unique-Unique) will be assigned to the pair. Such high quality valid pairs are retained. 
+
+### Removing PCR duplicates
+Experimental protocols can create PCR duplicates that need to be filtered. First, sort the .pairsam file:
+
+```
+pairtools sort --nproc <cores> --tmpdir=<path/to/tmpdir> <parsed.pairsam> > <sorted.pairsam>
+```
+Next, remove duplicates:
+
+```
+pairtools dedup --nproc-in <cores> --nproc-out <cores> --mark-dups --output-stats <stats.txt> \
+--output <dedup.pairsam> <sorted.pairsam>
+```
+pairtools dedup detects molecules that could be formed via PCR duplication and tags them as “DD” pair type. These pairs should be excluded from downstream analysis. Use the pairtools dedup command with the –output-stats option to save the dup stats into a text file.
+
+*Note:* If you are alinging a diploid library, this step should be ignored, as every single read has a copy on both parental chromosomes. 
+
+### Generating .pairs file
+The pairtools split command is used to split the final .pairsam into two files: .sam (or .bam) and .pairs (.pairsam has two extra columns containing the alignments from which the Omni-C pair was extracted, these two columns are not included in .pairs files). 
+
+```
+pairtools split --nproc-in <cores> --nproc-out <cores> --output-pairs <mapped.pairs> \
+--output-sam <unsorted.bam> <dedup.pairsam>
+```
+The .pairs file can be used for generating contact matrix.
 
 
 # From pairs to matrices
@@ -101,8 +151,8 @@ $ cooler balance /path/to/cool/file.cool
 ### Sum samples into one file
 A common practice in HiC data is to sum biological replicate matrices in order to increase sequencing depth, and thus matrix resolution. This can be done after checking that the biological replicates are indeed similar. It is advised to also conduct downstream analyses separately on each replicate to assess differences at those levels.
 ```
-hicSumMatrices -m ZmEn_1_10k.cool ZmEn_2_10k.cool -o ZmEn_10k.cool
-hicSumMatrices -m ZmMC_1_10k.cool ZmMC_2_10k.cool -o ZmMC_10k.cool
+hicSumMatrices -m replicate_1.cool replicate_2.cool -o merged_replicates.cool
+
 ```
 
 # HiC-Pro Pipeline 
@@ -115,6 +165,13 @@ For a standard Hi-C procedure, HiC-Pro pipeline is probably the most helpful too
 ### Setting up configuration file
 
 ### Running script on interactive node
+
+### HiC-Pro specificities
+
+
+
+
+HiC-Pro is very robust in terms of filtering valid interaction pairs. For it to run it requires a list of possible fragments generated by the restriction enzymes in a mix. Having every possible restriction fragment, the pipeline assigns each aligned read to it. Only read that come from the same pair and span across different restriction fragments are considered to be valid interaction pair generated by the HiC protocol. Such procedure helps to filter out self circle pairs, singletons and multi-hits. Short range interactions within restriction fragment are also discarded. Next each pair is flagged according toits classification, only valid unique-unique mapping pairs make it to the next step. 
 
 # Other pipelines
 Depending on what experimental procedure you use, some different pipelines could be more straightforward or compatible. Here are the alternative tools you might want to consider:
