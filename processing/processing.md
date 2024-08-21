@@ -106,6 +106,7 @@ hicSumMatrices -m ZmMC_1_10k.cool ZmMC_2_10k.cool -o ZmMC_10k.cool
 ```
 
 # HiC-Pro Pipeline 
+For a standard Hi-C procedure, HiC-Pro pipeline is probably the most helpful tool to use. It is a pain in the neck to set it up and sometimes it takes hours/days to debug, but when you get used to it, it becomes your best friend. The procedure is absolutely the same as described above, except the fact that it takes ~30 minutes to set it up and then it runs from .fasta to .matrix automatically on the dev node. Here I will outline a common procedure to set up the pipeline and major problems I have encountered. 
 
 ### Downloading HiC-Pro
 
@@ -114,6 +115,11 @@ hicSumMatrices -m ZmMC_1_10k.cool ZmMC_2_10k.cool -o ZmMC_10k.cool
 ### Setting up configuration file
 
 ### Running script on interactive node
+
+# Other pipelines
+Depending on what experimental procedure you use, some different pipelines could be more straightforward or compatible. Here are the alternative tools you might want to consider:
+- When preparing library with Arima HiC kit you can either follow their [recommended pipeline](https://github.com/ArimaGenomics/mapping_pipeline/blob/master/Arima_Mapping_UserGuide_A160156_v03.pdf) or use HiC-Pro
+- When processing Micro-C / Omni-C library, the HiC-Pro would not work, so it is better to process it manually. Additional instruction could be found [here](https://micro-c.readthedocs.io/en/latest/index.html) and [here](https://omni-c.readthedocs.io/en/latest/).
 
 # Read more
 [1] Iterative correction of HiC matrices by Imakaev et al. : 10.1038/nmeth.2148
