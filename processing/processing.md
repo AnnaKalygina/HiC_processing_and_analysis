@@ -93,18 +93,42 @@ pairtools dedup detects molecules that could be formed via PCR duplication and t
 *Note:* If you are alinging a diploid library, this step should be ignored, as every single read has a copy on both parental chromosomes. 
 
 ### Generating .pairs file
-The pairtools split command is used to split the final .pairsam into two files: .sam (or .bam) and .pairs (.pairsam has two extra columns containing the alignments from which the Omni-C pair was extracted, these two columns are not included in .pairs files). 
+The pairtools split command is used to split the final .pairsam into two files: .sam (or .bam) and .pairs (.pairsam has two extra columns containing the alignments from which the pair was extracted, these two columns are not included in .pairs files). 
 
 ```
 pairtools split --nproc-in <cores> --nproc-out <cores> --output-pairs <mapped.pairs> \
 --output-sam <unsorted.bam> <dedup.pairsam>
 ```
-The .pairs file can be used for generating contact matrix.
+This way of generating the .pairs file will yield sorted but not indexed. The .pairs file can be used for generating contact matrix. Though it is not covered in this tutorial, the .bam file could be sorted and index to then be used for evaluating the library complexity
 
 
 # From pairs to matrices
 
+To generate a matrix .pairs file must be separated into bins, each containing ***n*** base pairs. The ***n*** base pairs in the bins, or the binsize, corresponds to the resolution of a matrix. For example, the map of 1kb resolution will have (len_genome // 1000) number of bins, each corresponding to a sequential 1000 base pair region in a genome. 
+
 ### Convert .pairs (matrix) to .cool and .mcool
+We will use Cooler to generate .cool contact matrices.
+
+***Note:*** Cooler supports two different ways of converting pairs to .cool files. The one is `cooler cload pairix` command, that requires pairix-indexed contact list file as input. To use this method, we first need to index and compress our pairs with the following command:
+
+```
+cooler cload pairix -p <cores> <ref.genome>:<bin_size_in_bp> <mapped.pairs.gz> <matrix.cool>
+```
+This will output compressed mapped.pairs.gz file that could be used with `cooler cload pairix` in the next step. 
+
+However, in case you do not want to index and compress your pairs, there's another way to convert them to the .cool matrix by running:
+
+```
+cooler cload pairs --assembly <genome_assembly. e.g. hg38> -c1 <column with the 1st chromosome> -pos1 <column with position of the first read> -c2 <column with the 2nd chromosome> -p2 <coulmn with the second read position> <BINS> <PAIRS> <OUTDIR>
+```
+Here is the example of this command:
+```
+cooler cload pairs --assembly hg38 --chrom1 1 --pos1 2 --chrom2 3 --pos2 4 hg38.chrom.sizes:1024 mapped_pairs/concat_mapaq30_pairs.txt.gz K562_combined_1024.cool
+```
+
+When you are not sure what to choose, please consult [cooler documentation](https://readthedocs.org/projects/cooler/downloads/pdf/stable/).
+
+**SLURM script**
 As we want to generate matrices for different resolutions I would recommend running several script instead of doing everything manually. The resulting pairs are processed using cooler cload, and then converted to npz using cool2npy.py script that was adopted from C.origami:
 
 ``` bash
@@ -146,18 +170,20 @@ done
 
 ```
 
-If you want to conver .pairs into any other HiC formats, I recommend using [hicExplorer](https://hicexplorer.readthedocs.io/en/latest/content/tools/hicConvertFormat.html) function hicConvert.
+If you want to convert .pairs into any other HiC formats, I recommend using [hicExplorer](https://hicexplorer.readthedocs.io/en/latest/content/tools/hicConvertFormat.html) function hicConvert.
 
 ### Matrix correction
 As you could notice in the script from matrix convertation, we use command cooler balance, which normalizes matrices. Matrix correction is necessary to remove biases like gc content or mappability.
+
 In order to correct a matrix, it is assumed that if no biases were affecting the experiment, each bin should have equal “visibility” of contacts. This translates to an intuitive solution to matrix correction: transforming the matrix in such a way that the total number of contacts of every row and every column is the same. Such a procedure is called “matrix balancing”, and many algorithms have been described to achieve this for applications outside HiC data analysis. 
 For HiC data, the most common ones are called Knight-Ruiz (KR), and Iterative Correction (ICE). Have a look at an amazing breakdown of [normalization methods](https://liorpachter.wordpress.com/2013/11/17/imakaev_explained/).
 
-The cooler package has a funcrtion balance that performs iterative correction as it was developed in Imakaev 2012 [1]. Using this type of correction we filter bad based on MAD max (see explanation in the cooler balance -h). The "balancing weights" produced by cooler are the reciprocal of the "biases" as defined in Imakaev et al, 2012. By default, this function rescales the weights so that the corrected marginals sum to unity.
+The cooler package has a function balance that performs iterative correction as it was developed in Imakaev 2012 [1]. Using this type of correction we filter bad based on MAD max (see explanation in the cooler balance -h). The "balancing weights" produced by cooler are the reciprocal of the "biases" as defined in Imakaev et al, 2012. By default, this function rescales the weights so that the corrected contact frequencies sum to unity.
 
 ```
 $ cooler balance /path/to/cool/file.cool
 ```
+The `hicExplorer` is another package that helps perform matrix correction in a more tailored and elaborated way. 
 
 ### Sum samples into one file
 A common practice in HiC data is to sum biological replicate matrices in order to increase sequencing depth, and thus matrix resolution. This can be done after checking that the biological replicates are indeed similar. It is advised to also conduct downstream analyses separately on each replicate to assess differences at those levels.
@@ -169,9 +195,108 @@ hicSumMatrices -m replicate_1.cool replicate_2.cool -o merged_replicates.cool
 # HiC-Pro Pipeline 
 For a standard Hi-C procedure, HiC-Pro pipeline is probably the most helpful tool to use. It is a pain in the neck to set it up and sometimes it takes hours/days to debug, but when you get used to it, it becomes your best friend. The procedure is absolutely the same as described above, except the fact that it takes ~30 minutes to set it up and then it runs from .fasta to .matrix automatically on the dev node. Here I will outline a common procedure to set up the pipeline and major problems I have encountered. 
 
+### Setting up environment
+First, access HiC-Pro repository on [GitHub](https://github.com/nservant/HiC-Pro), additionaly they have a more detailed documentation in [pages](https://nservant.github.io/HiC-Pro/).
+For working in this repository I recommend creating new environmnet with conda using .yml file attached:
+```
+conda env create -f hicpro_environment.yml
+conda activate hicpro_environment
+```
 ### Downloading HiC-Pro
+Now, navigate to a directory where you want your HiC-Pro to be installed. To install HiC-Pro on a cluster in your personal folder, follow these steps:
+```
+# Clone repository from GitHub
+git clone https://github.com/nservant/HiC-Pro.git
+cd HiC-Pro
+
+# Edit config-install.txt
+nano config-install.txt
+```
+Change prefix that leads to your main directory, bowtie and samtools path to the packages that you downloaded with the environment:
+
+``` bash
+#########################################################################
+## Paths and Settings  - Start editing here !
+#########################################################################
+
+PREFIX = /scratch/users/<your folder> #this could be a current directory or anywhere you want it to be installed
+BOWTIE2_PATH = /home/groups/altemose/<your folder>/miniconda3/envs/hicpro_environment/bin/bowtie2
+SAMTOOLS_PATH = /home/groups/altemose/<your folder>/miniconda3/envs/hicpro_environment/bin/samtools
+R_PATH =
+PYTHON_PATH =
+CLUSTER_SYS = SLURM
+```
+Next, start installation:
+```
+make configure
+make install
+```
+This command will create a new HiC-Pro folder at the directory that you put in PREFIX.
+Now navigate to your $HOME directory and export path in .bashrc:
+
+``` bash
+nano .bashrc
+```
+Add the following line:
+``` bash
+export PATH=$PATH:"<your folder>"
+### <your folder> must be the same directory that you put in PREFIX in config-install.txt
+```
+Now, try calling HiC-Pro -h. If it works, it works!
 
 ### Setting up working directory
+Cool, now you have your tool ready, it's time to prepare your working directory. Everything need to be in order, nothing could be rearranged, otherwise, HiC-Pro wouldn't run.
+
+```
+# This is your working directory. I would call it by the name of a cell line
+mkdir cell_line
+cd cell_line
+
+
+# Create directory for annotation files
+mkdir annotation
+cd annotation
+```
+***Annotation folder** must contain the following files:
+
+- Reference genome that reads should be aligned to
+- Chromsizes. This file could be downloaded from the UCSC Genome browser or generated in the text editor:
+
+  ```
+  chr1    249250621
+  chr2    243199373
+  chr3    198022430
+  chr4    191154276
+  chr5    180915260
+  chr6    171115067
+  chr7    159138663
+  chr8    146364022
+  chr9    141213431
+  chr10   135534747
+  (...)
+  ```
+- Restriction fragments file in a .bed format. Please consult your HiC protocol to find the names of the restriction enzymes that were used in the experiment. For example, [Arima kit](https://arimagenomics.com/faqs/#:~:text=The%20Arima%2DHiC%20chemistry%20uses,for%20your%20genome%20of%20interest.) uses a cocktail of enzymes that digest chromatin at ^GATC and G^ANTC, where N can be any of the 4 genomic bases. There is a specia script available in HiC-Pro package, called [digest_genome.py](https://github.com/nservant/HiC-Pro/tree/master/annotation) that generates the restriction fragments file for you:
+  ```
+  ## Digest the mm9 genome by HindIII
+   HICPRO_PATH/bin/utils/digest_genome.py -r A^AGCTT -o mm9_hindiii.bed mm9.fasta
+
+   ## The same ...
+   HICPRO_PATH/bin/utils/digest_genome.py -r hindiii -o mm9_hindiii.bed mm9.fasta
+
+   ## Double digestion, HindIII + DpnII
+   HICPRO_PATH/bin/utils/digest_genome.py -r hindiii dpnii -o mm9_hindiii_dpnii.bed mm9.fasta
+  ```
+- Bowtie indexes for BWA alignment. To generate indexes run the folllowing:
+  ```
+  bowtie2-build --threads 8 path/to/reference_genome_fasta_file <ref_genome_prefix>
+  ```
+  This command only takes zipped fasta file as input. It will run for ~20 minutes and will ouput 6 index files with the [refix specified in the command. Make sure that the files do not contain .tmp suffic, otherwise, you will need to delete them and rerun the command with more memory allocation.
+
+Now you have your annotation folder set up. Now create a `rawdata` folder in the main `cell_line` directory:
+```
+mkdir rawdata
+```
+Move all .fasta read files that you need to process into this directory. 
 
 ### Setting up configuration file
 
