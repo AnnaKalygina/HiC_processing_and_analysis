@@ -25,6 +25,9 @@ Before we start mapping the reads to the reference genome, we need to prepare se
    bwa index <reference_genome.fasta>
    ```
 ### Read mapping 
+
+<img width="697" alt="Screenshot 2024-08-21 at 22 18 54" src="https://github.com/user-attachments/assets/b27747e3-0633-4c8d-930b-53db0767b684">
+
 After we prepared requred files beforehand we need to align the HiC reads library to a reference fasta file. If you download the data from someones experiments, sometimes they recommend using one algorithm over another. In our case, I would recommend using BWA-MEM alignment algorithm by default. In this case both reads are mapped together. For deep coverage data I would recommend requiesting a node for ~32 CPUs. Run the following command: 
 
 ```
@@ -47,14 +50,22 @@ Now we need to filter aligned reads to .pairs file, which will consist of only v
 
 A couple of terms to now before setting command parameters:
 
-**Ligation junction***
+**Ligation junction**
 Some kits, like Arima kit, introduce linkers to the ends if interacting pairs. Therefore, when sequenced, some reads will span ligation junctions introduced during experimental procedure. When these 'chimeric' single-end reads are mapped to the reference genome, and both 5' and 3' ends align to the sequence with a high mapping score, the 3' end portion that comes from the junction must be filtered out. Therefore, when a ligation event is identified in the alignment file the pairtools pipeline will record the outer-most (5’) aligned base pair.
+
+
 
 **Walks**
 It could happen, that during experimental procedure, more than 2 sequences get ligated together, yielding more than 2 hihg-quality alignments from only 2 reads, thwy are called walks. The most basic way to handle such walks is to disregard the middle portion with --walks-policy 5unique, however, if you want to save all high-quality mapping and consider them as valid combinations of pairs, the different walk policy could be used. 
 
+<img width="736" alt="Screenshot 2024-08-21 at 22 25 06" src="https://github.com/user-attachments/assets/bdf60395-ffaa-4e1d-b4e4-f2077b6071d3">
+
+
 **Alignment gaps**
 As opposed to walks, some portions of reads could align only partially. If a part of a read doesn't map well to the reference genome, we call it a gap. Such gaps could be considered as an accidental insertion or a technical artifact, thus we assume that even with this missing part our reads were formed by one ligation event and therefore a pair must be reported. To set how big gaps the command must tolerate before reporting a pair we set --max-inter-align-gap. Traditionally this value is set to 30bp.
+
+<img width="726" alt="Screenshot 2024-08-21 at 22 26 15" src="https://github.com/user-attachments/assets/87cc2acf-b6a3-4947-b177-fa179374ea44">
+
 
 For optimal results run the following command:
 ```
