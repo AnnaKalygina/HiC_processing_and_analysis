@@ -5,6 +5,12 @@ There are many ways to process the HiC data from the .fasta format to the final 
 - pairtools
 - cooltools
 - HiC-Pro
+I recommend creating new environmnet with conda using [.yml file attached](../hicpro_environmnet.yaml).
+```
+conda env create -f hicpro_environment.yml
+conda activate hicpro_environment
+
+```
 
 ### Pre-processing
 Before we start mapping the reads to the reference genome, we need to prepare several files that will be used alongside. 
@@ -197,7 +203,7 @@ For a standard Hi-C procedure, HiC-Pro pipeline is probably the most helpful too
 
 ### Setting up environment
 First, access HiC-Pro repository on [GitHub](https://github.com/nservant/HiC-Pro), additionaly they have a more detailed documentation in [pages](https://nservant.github.io/HiC-Pro/).
-For working in this repository I recommend creating new environmnet with conda using .yml file attached:
+For working in this repository I recommend creating new environmnet with conda using [.yml file attached](../hicpro_environmnet.yaml):
 ```
 conda env create -f hicpro_environment.yml
 conda activate hicpro_environment
