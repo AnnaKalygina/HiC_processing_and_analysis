@@ -5,7 +5,7 @@ There are many ways to process the HiC data from the .fasta format to the final 
 - pairtools
 - cooltools
 - HiC-Pro
-I recommend creating new environmnet with conda using [.yml file attached](../hicpro_environmnet.yaml).
+I recommend creating new environmnet with conda using [.yml file attached](hicpro_environmnet.yaml).
 ```
 conda env create -f hicpro_environment.yml
 conda activate hicpro_environment
@@ -203,7 +203,7 @@ For a standard Hi-C procedure, HiC-Pro pipeline is probably the most helpful too
 
 ### Setting up environment
 First, access HiC-Pro repository on [GitHub](https://github.com/nservant/HiC-Pro), additionaly they have a more detailed documentation in [pages](https://nservant.github.io/HiC-Pro/).
-For working in this repository I recommend creating new environmnet with conda using [.yml file attached](../hicpro_environmnet.yaml):
+For working in this repository I recommend creating new environmnet with conda using [.yml file attached](hicpro_environmnet.yaml):
 ```
 conda env create -f hicpro_environment.yml
 conda activate hicpro_environment
