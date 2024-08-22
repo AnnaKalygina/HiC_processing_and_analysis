@@ -6,9 +6,8 @@ Here I perform screening for such candidates based on the Shannon entropy and In
 Shannon entropy measures the uncertainty or disorder in a system. Higher entropy suggests a more uniform distribution of interactions within the region, where no particular pattern dominates.
 Shannon entropy is calculated using following formula:
 
-$
-Entropy(H) = -\sum p(x)\log p(x)
-$
+$Entropy(H) = -\sum p(x)\log p(x)$
+
 , where $x$ is an individual cell in the matrix.
 
 Inuslation score is a measure of how insulated the region is when compared to its neighbours. There are different ways to calculate the insulation score (more on it on a dedicated page), but I will be using the total count of interactions in the region.
