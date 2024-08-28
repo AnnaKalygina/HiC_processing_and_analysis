@@ -6,7 +6,7 @@ However, we can track attention to different regions of the DNA during training 
 
 ### Extract TSS data from the SK1 yeast strain 
 
-I hypothesized that the greatest attention would be associated with transcription start sites (TSS) and promoter regions, as they are biologically significant. Therefore, the first step is to extract data on promoter and TSS regions from the SK1 yeast strain. This data is available in the file SK1_PacBio.all_feature_modified_2genes.gff uploaded in this folder. Load it into the Jupyter notebook:
+I hypothesized that the greatest attention would be associated with transcription start sites (TSS) and promoter regions, as they are biologically significant. Therefore, the first step is to extract data on promoter and TSS regions from the SK1 yeast strain. This data is available in the file `SK1_PacBio.all_feature_modified_2genes.gff` uploaded in this folder. Load it into the Jupyter notebook:
 
 ``` python
 gff_df = pd.read_csv('/Users/tennisnyjmac/Downloads/SK1_PacBio.all_feature_modified_2genes.gff', sep='\t', comment='#', header=None, 
