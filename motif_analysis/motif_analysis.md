@@ -1,8 +1,9 @@
 # Ananlysing distribution of CTCT motifs in CHM13 and its impact on chromatin interactions
-### Scanning for motifs in CHM13
+
+## Scanning for motifs in CHM13
 Additionaly installed [HOMER software](http://homer.ucsd.edu/homer/index.html) is required for the following analysis.
 
-The CTCF motifs were downloaded from JASPAR with the following ID: [MA0139.1](https://jaspar.elixir.no/matrix/MA0139.1). The file was converted into HOMER-compatible .matrix format. As it is instructed in the [HOMER documentation](http://homer.ucsd.edu/homer/motif/creatingCustomMotifs.html), the file must be tab-delimited and must contain a logg-odds threshold. The CTCF.motif file is avalable in this repository or on cluster at `/oak/stanford/groups/altemose/kalyanna/ctcf_in_chm13/CTCF_homer_compatible.motif`.
+The CTCF motifs were downloaded from JASPAR with the following ID: [MA0139.1](https://jaspar.elixir.no/matrix/MA0139.1). The file was converted into HOMER-compatible .matrix format. As it is instructed in the [HOMER documentation](http://homer.ucsd.edu/homer/motif/creatingCustomMotifs.html), the file must be tab-delimited and must contain a logg-odds threshold. The CTCF.motif file is avalable [in this repository](CTCF_homer_compatible.motif) or on cluster at `/oak/stanford/groups/altemose/kalyanna/ctcf_in_chm13/CTCF_homer_compatible.motif`.
 
 Next, I pass the .motif file to scan the CHM13 genome for specified CTCF motifs using the `scanMotifGenomeWide.pl` from HOMER package:
 
@@ -14,7 +15,8 @@ chm13v2.0.fa \
 ```
 The threshold could be scpecified for more or less robust scanning.
 
-### Analysing distribution of CTCF motifs in active $\alpha$ satellites 
+
+## Analysing distribution of CTCF motifs in active $\alpha$ satellites 
 <img width="1061" alt="Screenshot 2024-08-28 at 11 56 17" src="https://github.com/user-attachments/assets/8fec7861-d2cf-4a42-9d35-b6dcaf87aeb5">
 <img width="1069" alt="Screenshot 2024-08-28 at 11 56 33" src="https://github.com/user-attachments/assets/86dc20e2-7f0c-4645-8036-928bfd577dea">
 
