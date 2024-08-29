@@ -46,4 +46,8 @@ Conversely, on chromosome X, the motifs are much sparser (n_motifs = 78 motifs, 
 **GRAPH 4:***
 <img width="1104" alt="Screenshot 2024-08-28 at 11 58 16" src="https://github.com/user-attachments/assets/205924d0-b53e-4cbc-b660-0934f7f67395">
 
+
+Below (graph 5) are the satellites from Nick’s annotation (seems valid), below is the distribution of CTCF motifs (blue - “+”, orange - “-”). It seems like the distribution of + and - is somewhat uniform, but CTCF tends to avoid certain regions, like hsat2_1_6(A2, A1, B) and other hsat2/3, and several inactive hor. 
+
+**GRAPH 5:**
 <img width="1102" alt="Screenshot 2024-08-28 at 11 58 34" src="https://github.com/user-attachments/assets/aaa53b63-61bd-4b62-ae7f-96af1e3cd046">
