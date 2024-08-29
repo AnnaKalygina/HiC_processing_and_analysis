@@ -7,7 +7,7 @@ I processed data from various sources for four cell lines:
 - **CHM13** (HiC)
 - **HG002** (HiC)
 
-The fully processed data and intermediate files are available on the SHERLOCK cluster in dedicated directories, organized by cell line and method. You can access these files at `/oak/stanford/groups/altemose/kalyanna/<cell_line>_<method>`, for example, `/oak/stanford/groups/altemose/kalyanna/GM12878_hic/`. Additional protocols for how the data was processed could be found at the [processing section](../processing)
+The fully processed data and intermediate files are available on the SHERLOCK cluster in dedicated directories, organized by cell line and method. You can access these files at `/oak/stanford/groups/altemose/kalyanna/<cell_line>_<method>`, for example, `/oak/stanford/groups/altemose/kalyanna/GM12878_hic/`. Additional protocols for how the data was processed could be found at the [processing section](../processing).
 
 These repositories are gzipped for efficient storage and can be easily accessed by unzipping the files. Additionally, the reference genome sequences and associated annotation files are stored in the `/oak/stanford/groups/altemose/kalyanna/reference_genomes/` directory.
 
