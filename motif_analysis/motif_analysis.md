@@ -1,4 +1,4 @@
-# Ananlysing CTCT motifs in CHM13 and its impact on chromatin interactions
+# Ananlysing distribution of CTCT motifs in CHM13 and its impact on chromatin interactions
 ### Scanning for motifs in CHM13
 
 ### Analysing distribution of CTCF motifs in active $\alpha$ satellites 
