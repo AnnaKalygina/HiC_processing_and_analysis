@@ -17,6 +17,8 @@ The threshold could be scpecified for more or less robust scanning.
 
 
 ## Analysing distribution of CTCF motifs in active $\alpha$ satellites 
+Script for the following analysis could be found in the [jupyter notebook](../CTCF_analysis.ipynb) attached to this repository.
+
 The active $\alpha$ satellites are sampled from [Cen/Sat v2.1 annotation](https://s3-us-west-2.amazonaws.com/human-pangenomics/T2T/CHM13/assemblies/annotation/chm13v2.0_censat_v2.1.bed) and are available at `/oak/stanford/groups/altemose/kalyanna/ctcf_in_chm13/	active_hor_in_CHM13.bed` , all CTCF motifs are available at `/oak/stanford/groups/altemose/kalyanna/ctcf_in_chm13/	CTCF_in_CHM13_19bp_t5.bed`. 
 
 The CTCF motifs that occur in active HORs could be found by intersecting these two .bed files using `bedtools`:
